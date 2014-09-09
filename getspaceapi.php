@@ -42,6 +42,7 @@ function getspaceapi_options() {
 
 	$json_open = 'getspaceapi_json_open';
 	$json_open_val = html_entity_decode(htmlspecialchars_decode(get_option( $json_open )));
+	print_r($json_open_val);
 
 	$json_closed = 'getspaceapi_json_closed';
 	$json_closed_val = html_entity_decode(htmlspecialchars_decode(get_option( $json_closed )));
@@ -56,12 +57,12 @@ function getspaceapi_options() {
         // Read their posted value
         $json_url_val  = $_POST[ $json_url ];
         $json_icon_val  = $_POST[ $json_icon ];
-        $json_open_val  = htmlspecialchars(stripslashes($_POST[ $json_open ]));
-        $json_closed_val  = htmlspecialchars(stripslashes($_POST[ $json_closed ]));
+
+        $json_open_val  = stripslashes($_POST[ $json_open ]);
+        $json_closed_val  = stripslashes($_POST[ $json_closed ]);
 
         //TODO : store and get bool
-        echo "Val:[".$json_icon_val."]<p>";
-
+        //echo "Val:[".$json_icon_val."]<p>";
 
         // Save the posted value in the database
         update_option( $json_url , $json_url_val  );
@@ -71,7 +72,11 @@ function getspaceapi_options() {
 
 
         // Put an settings updated message on the screen
-        echo '<div class="updated"><p><strong>'. _e('settings saved.', 'menu-test' ); .'</strong></p></div>';
+        //echo '<div class="updated"><p><strong>'. _e('settings saved.', 'menu-test' ); .'</strong></p></div>';
+        //echo '<div class="updated"><p><strong>settings saved.</strong></p></div>';
+		echo '<div class="updated"><p><strong>'. _e('settings saved.', 'menu-test' ).'</strong></p></div>';
+
+
    
     }
     ?>
@@ -83,6 +88,7 @@ function getspaceapi_options() {
 	<input type="url" name="<?php echo $json_url; ?>" value="<?php echo $json_url_val; ?>" size="50">
 
 	</p><hr />
+
 
 	<p><?php _e("Show icon:", 'get_spaceapi_showicon' ); ?> 
 	<input type="checkbox" name="<?php echo $json_icon; ?>" value="<?php echo $json_icon_val; ?>" size="20">
@@ -235,27 +241,6 @@ class getspaceapi_Widget extends WP_Widget {
 		<p>
 			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e('Title:', 'hybrid'); ?></label>
 			<input id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" style="width:100%;" />
-		</p>
-
-		<!-- Your Name: Text Input -->
-		<p>
-			<label for="<?php echo $this->get_field_id( 'name' ); ?>"><?php _e('Your Name:', 'getspaceapi'); ?></label>
-			<input id="<?php echo $this->get_field_id( 'name' ); ?>" name="<?php echo $this->get_field_name( 'name' ); ?>" value="<?php echo $instance['name']; ?>" style="width:100%;" />
-		</p>
-
-		<!-- Sex: Select Box -->
-		<p>
-			<label for="<?php echo $this->get_field_id( 'sex' ); ?>"><?php _e('Sex:', 'getspaceapi'); ?></label> 
-			<select id="<?php echo $this->get_field_id( 'sex' ); ?>" name="<?php echo $this->get_field_name( 'sex' ); ?>" class="widefat" style="width:100%;">
-				<option <?php if ( 'male' == $instance['format'] ) echo 'selected="selected"'; ?>>male</option>
-				<option <?php if ( 'female' == $instance['format'] ) echo 'selected="selected"'; ?>>female</option>
-			</select>
-		</p>
-
-		<!-- Show Sex? Checkbox -->
-		<p>
-			<input class="checkbox" type="checkbox" <?php checked( $instance['show_sex'], true ); ?> id="<?php echo $this->get_field_id( 'show_sex' ); ?>" name="<?php echo $this->get_field_name( 'show_sex' ); ?>" /> 
-			<label for="<?php echo $this->get_field_id( 'show_sex' ); ?>"><?php _e('Display sex publicly?', 'getspaceapi'); ?></label>
 		</p>
 
 	<?php
