@@ -6,7 +6,8 @@
  * Version: 0.1.0
  * Author: Dave Borghuis
  * Author URI: http://Daveborghuis.nl
- *
+ * More information on http://spaceapi.net
+ * 
  * LICENCE : GLP3
  * See included GPL3Licence.txt for full text
  * 
@@ -33,22 +34,20 @@ function getspaceapi_options() {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 
-
+	//Get stored values from database
 	$json_url = 'getspaceapi_json_url';
 	$json_url_val = get_option( $json_url );
 
 	$json_icon = 'getspaceapi_json_icon';
 	$json_icon_val = get_option( $json_icon );
-
+	
 	$json_open = 'getspaceapi_json_open';
 	$json_open_val = html_entity_decode(htmlspecialchars_decode(get_option( $json_open )));
-	print_r($json_open_val);
 
 	$json_closed = 'getspaceapi_json_closed';
 	$json_closed_val = html_entity_decode(htmlspecialchars_decode(get_option( $json_closed )));
 
     $hidden_field_name = 'js_submit_hidden';
-    $data_field_name = 'json_url';
 
 	// See if the user has posted us some information
     // If they did, this hidden field will be set to 'Y'
@@ -56,13 +55,14 @@ function getspaceapi_options() {
 
         // Read their posted value
         $json_url_val  = $_POST[ $json_url ];
-        $json_icon_val  = $_POST[ $json_icon ];
+
+        if (isset($_POST[ $json_icon ])) 
+        		{$json_icon_val  = 'Y';} 
+        	else 
+        		{$json_icon_val  = 'N';};
 
         $json_open_val  = stripslashes($_POST[ $json_open ]);
         $json_closed_val  = stripslashes($_POST[ $json_closed ]);
-
-        //TODO : store and get bool
-        //echo "Val:[".$json_icon_val."]<p>";
 
         // Save the posted value in the database
         update_option( $json_url , $json_url_val  );
@@ -70,39 +70,29 @@ function getspaceapi_options() {
 		update_option( $json_open , $json_open_val  );
         update_option( $json_closed , $json_closed_val  );
 
-
         // Put an settings updated message on the screen
-        //echo '<div class="updated"><p><strong>'. _e('settings saved.', 'menu-test' ); .'</strong></p></div>';
-        //echo '<div class="updated"><p><strong>settings saved.</strong></p></div>';
 		echo '<div class="updated"><p><strong>'. _e('settings saved.', 'menu-test' ).'</strong></p></div>';
 
-
-   
     }
     ?>
 
 	<form name="form1" method="post" action="">
 	<input type="hidden" name="<?php echo $hidden_field_name; ?>" value="Y">
-	<p><?php _e("JSON URL:", 'get_spaceapi_url' ); ?> 
-	<!--<input type="text" name="<?php echo $data_field_name; ?>" value="<?php echo $json_val; ?>" size="20">-->
+	<p><?php _e("JSON URL : ", 'get_spaceapi_url' ); ?> 
 	<input type="url" name="<?php echo $json_url; ?>" value="<?php echo $json_url_val; ?>" size="50">
-
 	</p><hr />
 
+	<p><?php _e("Show icon : ", 'get_spaceapi_showicon' ); ?> 
+	<input type="checkbox" name="<?php echo $json_icon; ?>" value="<?php echo $json_icon; ?>" <?php if( $json_icon_val == 'Y') echo "checked"; ?> size="20">
+	</p>
 
-	<p><?php _e("Show icon:", 'get_spaceapi_showicon' ); ?> 
-	<input type="checkbox" name="<?php echo $json_icon; ?>" value="<?php echo $json_icon_val; ?>" size="20">
-	</p><hr />
-
-	<p><?php _e("Open Text:", 'get_spaceapi_open' ); ?> 
+	<p><?php _e("Open Text : ", 'get_spaceapi_open' ); ?> 
 	<input type="textarea" name="<?php echo $json_open; ?>" value="<?php echo htmlentities($json_open_val); ?>" size="50">
-	</p><hr />
+	</p>
 
-	<p><?php _e("Closed Text:", 'get_spaceapi_closed' ); ?> 
+	<p><?php _e("Closed Text : ", 'get_spaceapi_closed' ); ?> 
 	<input type="textarea" name="<?php echo $json_closed; ?>" value="<?php echo htmlentities($json_closed_val); ?>" size="50">
 	</p><hr />
-
-
 
 	<p class="submit">
 	<input type="submit" name="Submit" class="button-primary" value="<?php esc_attr_e('Save Changes') ?>" />
@@ -135,7 +125,7 @@ function getspaceapi_load_widgets() {
  * This class handles everything that needs to be handled with the widget:
  * the settings, form, display, and update.
  *
- * @since 0.1.0
+ * @since 0.1.1
  */
 class getspaceapi_Widget extends WP_Widget {
 
@@ -187,26 +177,30 @@ class getspaceapi_Widget extends WP_Widget {
 			echo $before_title . $title . $after_title;
 
 		//Print icon if available
-		if(true){
-			echo '<img src="';
+		if($json_icon_val == 'Y'){
+			echo '<div><img style="display: block; margin: 0 auto; border-style:none; box-shadow: none;"  border="0" src="'; //remove border
 			//Print Open/Clode text
 			if ( $json->state->open )  {
 				echo $json->icon->open;
 			} else {
 				echo $json->icon->closed;
 			};
-			echo '"">';
+			echo '""></div>';
 		};
 
 		//Print Open/Clode text
-		if ( $json->state->open )  {
-			//Print Open text
-			if ( $json_open_val )
-				echo $json_open_val;
-		} else {
-			//Print Closed text
-			if ( $json_closed_val )
-				echo $json_closed_val;
+		if (isset($json_open_val) && isset($json_closed_val)) {
+			echo "<div>";
+			if ( $json->state->open )  {
+				//Print Open text
+				if ( $json_open_val )
+					echo $json_open_val;
+			} else {
+				//Print Closed text
+				if ( $json_closed_val )
+					echo $json_closed_val;
+			};
+			echo "</div>";
 		};
 
 		/* After widget (defined by themes). */
